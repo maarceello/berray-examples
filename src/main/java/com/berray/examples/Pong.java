@@ -1,17 +1,16 @@
 package com.berray.examples;
 
 import com.berray.BerrayApplication;
-import com.berray.EventCallback;
 import com.berray.GameObject;
 
 
-//import static com.berray.AssetManager.loadSprite;
+import static com.berray.AssetManager.loadSprite;
+import static com.berray.AssetManager.loadMusic;
 import static com.berray.components.PosComponent.pos;
 import static com.berray.components.SpriteComponent.sprite;
+import static com.berray.components.RotateComponent.rotate;
 
 public class Pong extends BerrayApplication {
-
-  public void onEvent(String event, EventCallback callback){}
 
   @Override
   public void initWindow() {
@@ -23,18 +22,16 @@ public class Pong extends BerrayApplication {
   @Override
   public void initGame() {
 
-    //loadSprite("bean","recouses/berry.png");
+    loadSprite("bean","resources/berry.png");
+    loadMusic("wind", "resources/wind.mp3");
 
     GameObject player = add(
-        sprite("resources/berry.png")
+        sprite("bean")
             .anim("idle")
         ,
-        pos(129, 83)
+        pos(129, 83),
+        rotate(89)
     );
-
-    //  player.on("collide", (do) ->{
-    //     do.add()
-    //  });
 
   }
 
