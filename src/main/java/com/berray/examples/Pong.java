@@ -82,7 +82,7 @@ public class Pong extends BerrayApplication {
       if (pos.getX() < 0 || pos.getX() > width()) {
         score = 0;
         pos = center();
-        vel = Vec2.fromAngle((float) ((Math.random() - 0.5) * 40));
+        vel = Vec2.fromAngle((float) ((Math.random() - 0.5) * 40)).negate();
         speed = 320;
       }
       if (pos.getX() < 0 || pos.getY() > height()) {
