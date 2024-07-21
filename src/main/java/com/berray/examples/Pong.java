@@ -5,26 +5,17 @@ import com.berray.GameObject;
 import com.berray.math.Vec2;
 import com.raylib.Jaylib;
 
-import static com.raylib.Jaylib.RED;
-
-
 import static com.berray.AssetManager.loadSprite;
-import static com.berray.AssetManager.loadMusic;
-import static com.berray.components.PosComponent.pos;
-import static com.berray.components.RectComponent.rect;
-import static com.berray.components.CircleComponent.circle;
-import static com.berray.components.SpriteComponent.sprite;
-import static com.berray.components.RotateComponent.rotate;
-import static com.berray.components.AreaComponent.*;
-import static com.berray.components.TextComponent.text;
+import static com.berray.components.AnchorType.CENTER;
 
 public class Pong extends BerrayApplication {
+  private int score = 0;
 
   @Override
   public void initWindow() {
     width(1024);
     height(768);
-    background(RED);
+    background(new Jaylib.Color(255, 255, 128, 255));
     title("Pong Game");
   }
 
@@ -32,74 +23,54 @@ public class Pong extends BerrayApplication {
   public void initGame() {
 
     loadSprite("berry", "resources/berry.png");
-    loadMusic("wind", "resources/wind.mp3");
 
     debug = true;
 
-    GameObject infoTxt = add(
-        text("Hello im a berry"),
-        area()
-    );
-
-    GameObject startTxt = add(
-        text("Press Space to start...not"),
-        pos(1024 / 2, 768 / 2),
-        area()
-    );
-
-    GameObject rect = add(
+    // add paddles
+    add(
+        pos(40, 0),
         rect(20, 80),
-        pos(129, 83),
-        area()
+//        outline(4),
+        anchor(CENTER),
+        area(),
+        "paddle"
     );
 
-    GameObject rect2 = add(
+    add(
+        pos(width() - 40, 0),
         rect(20, 80),
-        pos(300, 300),
-        rotate(45),
-        "foo",
-        area()
+//        outline(4),
+        anchor(CENTER),
+        area(),
+        "paddle"
     );
 
-    GameObject rect3 = add(
-        rect(80, 80),
-        pos(40, 768 - 40)
-    );
-
-    GameObject circle = add(
-        circle(80),
-        pos(400, 183),
-        area()
-    );
-
-    GameObject berry = add(
-        sprite("berry"),
-        pos(110, 100),
-        rotate(45),
-        area()
-    );
-
-    GameObject berry2 = add(
-        sprite("berry"),
-        pos(500, 100),
-        area()
-    );
-
-    on("mousePress", (event) -> {
-      Vec2 pos = event.getParameter(0);
-      berry2.set("pos", pos);
-    });
-
-    game.onUpdate("sprite", event -> {
+    // move paddles with mouse
+    game.onUpdate("paddle", event -> {
       GameObject gameObject = event.getParameter(0);
-      Vec2 pos = gameObject.get("pos");
-      int mouseY = Jaylib.GetMouseY();
-      if (pos != null) {
-        // Note: this updates the pos inside the component
-        pos.setY(mouseY);
-      }
+      gameObject.getOrDefault("pos", Vec2.origin()).setY(Jaylib.GetMouseY());
     });
+
+    // score counter
+    GameObject scoreCounter = add(
+        text(String.valueOf(score)),
+        pos(center()),
+        anchor(CENTER)
+//        z(50),
+    );
+    scoreCounter.on("update", event -> {
+      scoreCounter.set("text", String.valueOf(score));
+
+    });
+
   }
+
+
+//
+//    on("mousePress", (event) -> {
+//      Vec2 pos = event.getParameter(0);
+//      berry2.set("pos", pos);
+//    });
 
 
   public static void main(String[] args) {
