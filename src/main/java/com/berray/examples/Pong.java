@@ -49,7 +49,8 @@ public class Pong extends BerrayApplication {
     GameObject rect2 = add(
         rect(20, 80),
         pos(300, 300),
-        rotate(45)
+        rotate(45),
+        "foo"
     );
 
     GameObject rect3 = add(
