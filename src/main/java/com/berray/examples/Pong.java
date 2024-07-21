@@ -14,6 +14,7 @@ import static com.berray.components.RectComponent.rect;
 import static com.berray.components.CircleComponent.circle;
 import static com.berray.components.SpriteComponent.sprite;
 import static com.berray.components.RotateComponent.rotate;
+import static com.berray.components.AreaComponent.*;
 import static com.berray.components.TextComponent.text;
 
 public class Pong extends BerrayApplication {
@@ -32,26 +33,31 @@ public class Pong extends BerrayApplication {
     loadSprite("berry", "resources/berry.png");
     loadMusic("wind", "resources/wind.mp3");
 
+    debug = true;
 
     GameObject infoTxt = add(
-        text("Hello im a berry")
+        text("Hello im a berry"),
+        area()
     );
 
     GameObject startTxt = add(
         text("Press Space to start...not"),
-        pos(1024 / 2, 768 / 2)
+        pos(1024 / 2, 768 / 2),
+        area()
     );
 
     GameObject rect = add(
         rect(20, 80),
-        pos(129, 83)
+        pos(129, 83),
+        area()
     );
 
     GameObject rect2 = add(
         rect(20, 80),
         pos(300, 300),
         rotate(45),
-        "foo"
+        "foo",
+        area()
     );
 
     GameObject rect3 = add(
@@ -61,18 +67,21 @@ public class Pong extends BerrayApplication {
 
     GameObject circle = add(
         circle(80),
-        pos(400, 183)
+        pos(400, 183),
+        area()
     );
 
     GameObject berry = add(
         sprite("berry"),
         pos(110, 100),
-        rotate(45)
+        rotate(45),
+        area()
     );
 
     GameObject berry2 = add(
         sprite("berry"),
-        pos(500, 100)
+        pos(500, 100),
+        area()
     );
 
     on("mousePress", (event) -> {
