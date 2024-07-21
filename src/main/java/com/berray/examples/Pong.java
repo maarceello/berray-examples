@@ -17,7 +17,7 @@ public class Pong extends BerrayApplication {
   public void initWindow() {
     width(1024);
     height(768);
-    background(new Jaylib.Color(255, 255, 128, 255));
+    background(Jaylib.GRAY);
     title("Pong Game");
   }
 
@@ -26,7 +26,7 @@ public class Pong extends BerrayApplication {
 
     loadSprite("berry", "resources/berry.png");
 
-    debug = true;
+//    debug = true;
 
     // add paddles
     add(
@@ -85,8 +85,8 @@ public class Pong extends BerrayApplication {
         vel = Vec2.fromAngle((float) ((Math.random() - 0.5) * 40)).negate();
         speed = 320;
       }
-      if (pos.getX() < 0 || pos.getY() > height()) {
-        vel.setY(vel.getY());
+      if (pos.getY() < 0 || pos.getY() > height()) {
+        vel.setY(-vel.getY());
       }
       ball.set("pos", pos);
       ball.setProperty("vel", vel);
