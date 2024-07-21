@@ -3,6 +3,7 @@ package com.berray.examples;
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
 import com.berray.math.Vec2;
+import com.raylib.Jaylib;
 
 import static com.raylib.Jaylib.RED;
 
@@ -89,6 +90,15 @@ public class Pong extends BerrayApplication {
       berry2.set("pos", pos);
     });
 
+    game.onUpdate("sprite", event -> {
+      GameObject gameObject = event.getParameter(0);
+      Vec2 pos = gameObject.get("pos");
+      int mouseY = Jaylib.GetMouseY();
+      if (pos != null) {
+        // Note: this updates the pos inside the component
+        pos.setY(mouseY);
+      }
+    });
   }
 
 
