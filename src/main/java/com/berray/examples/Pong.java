@@ -2,6 +2,7 @@ package com.berray.examples;
 
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
+import com.berray.math.Vec2;
 
 import static com.raylib.Jaylib.RED;
 
@@ -73,6 +74,11 @@ public class Pong extends BerrayApplication {
         sprite("berry"),
         pos(500, 100)
     );
+
+    on("mousePress", (event) -> {
+      Vec2 pos = event.getParameter(0);
+      berry2.set("pos", pos);
+    });
 
   }
 
