@@ -1,4 +1,4 @@
-package com.berray.examples;
+package com.berray.examples.pong;
 
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
@@ -22,17 +22,11 @@ public class Pong extends BerrayApplication {
   }
 
   @Override
-  public void initGame() {
+  public void runGame() {
 
-    loadSprite("berry", "resources/berry.png");
-
-//    debug = true;
-
-    // add paddles
     add(
         pos(40, 0),
         rect(20, 80),
-//        outline(4),
         anchor(CENTER),
         area(),
         "paddle"
@@ -41,13 +35,11 @@ public class Pong extends BerrayApplication {
     add(
         pos(width() - 40, 0),
         rect(20, 80),
-//        outline(4),
         anchor(CENTER),
         area(),
         "paddle"
     );
 
-    // move paddles with mouse
     game.onUpdate("paddle", event -> {
       GameObject gameObject = event.getParameter(0);
       gameObject.getOrDefault("pos", Vec2.origin()).setY(Jaylib.GetMouseY());
@@ -58,7 +50,6 @@ public class Pong extends BerrayApplication {
         text(String.valueOf(score)),
         pos(center()),
         anchor(CENTER)
-//        z(50),
     );
     scoreCounter.on("update", event -> {
       scoreCounter.set("text", String.valueOf(score));
@@ -68,11 +59,10 @@ public class Pong extends BerrayApplication {
     GameObject ball = add(
         pos(center()),
         circle(16),
-//        outline(4),
         area(new Rect(-16, -16, 32, 32))
     );
     ball.setProperty("vel", Vec2.fromAngle((float) ((Math.random() - 0.5) * 40)));
-// move ball, bounce it when touche horizontal edges, respawn when touch vertical edges
+
     ball.on("update", event -> {
       float deltaTime = event.getParameter(0);
       Vec2 vel = ball.getProperty("vel");
