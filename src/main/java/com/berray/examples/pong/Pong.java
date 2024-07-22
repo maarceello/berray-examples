@@ -22,7 +22,7 @@ public class Pong extends BerrayApplication {
   }
 
   @Override
-  public void runGame() {
+  public void game() {
 
     add(
         pos(40, 0),

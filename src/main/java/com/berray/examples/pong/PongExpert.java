@@ -22,7 +22,7 @@ public class PongExpert extends BerrayApplication {
   }
 
   @Override
-  public void runGame() {
+  public void game() {
     addPaddle(40);
     addPaddle(width() - 40);
 
