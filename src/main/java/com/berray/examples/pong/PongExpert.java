@@ -10,7 +10,7 @@ import com.raylib.Jaylib;
 import com.raylib.Raylib;
 
 import static com.berray.components.core.AnchorType.CENTER;
-import static com.berray.objects.Label.label;
+import static com.berray.objects.core.Label.label;
 
 /** Pong with more object-oriented structure. */
 public class PongExpert extends BerrayApplication {
