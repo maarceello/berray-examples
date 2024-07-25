@@ -6,8 +6,7 @@ import com.berray.math.Rect;
 import com.berray.math.Vec2;
 import com.raylib.Jaylib;
 
-import static com.berray.AssetManager.loadSprite;
-import static com.berray.components.AnchorType.CENTER;
+import static com.berray.components.core.AnchorType.CENTER;
 
 public class Pong extends BerrayApplication {
   private int score = 0;
@@ -42,7 +41,9 @@ public class Pong extends BerrayApplication {
 
     game.onUpdate("paddle", event -> {
       GameObject gameObject = event.getParameter(0);
-      gameObject.getOrDefault("pos", Vec2.origin()).setY(Jaylib.GetMouseY());
+      Vec2 pos = gameObject.getOrDefault("pos", Vec2.origin());
+      pos.setY(Jaylib.GetMouseY());
+      gameObject.set("pos", pos);
     });
 
     // score counter

@@ -2,15 +2,15 @@ package com.berray.examples.pong;
 
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
-import com.berray.components.AnchorType;
+import com.berray.components.core.AnchorType;
 import com.berray.examples.pong.data.GameData;
 import com.berray.examples.pong.objects.Ball;
-import com.berray.objects.Label;
 import com.berray.math.Vec2;
 import com.raylib.Jaylib;
 import com.raylib.Raylib;
 
-import static com.berray.components.AnchorType.CENTER;
+import static com.berray.components.core.AnchorType.CENTER;
+import static com.berray.objects.core.Label.label;
 
 /** Pong with more object-oriented structure. */
 public class PongExpert extends BerrayApplication {
@@ -34,13 +34,23 @@ public class PongExpert extends BerrayApplication {
     // move paddles with mouse
     game.onUpdate("paddle", event -> {
       GameObject gameObject = event.getParameter(0);
-      gameObject.getOrDefault("pos", Vec2.origin()).setY(Jaylib.GetMouseY());
+      Vec2 pos = gameObject.getOrDefault("pos", Vec2.origin());
+      pos.setY(Jaylib.GetMouseY());
+      gameObject.set("pos", pos);
     });
 
     // add score label to the center of the screen
-    game.addChild(new Label(center(), CENTER, () -> String.valueOf(gameData.getScore())));
+    game.add(
+        label(() -> String.valueOf(gameData.getScore())),
+        pos(center()),
+        anchor( CENTER)
+    );
     // add fps label to top left
-    game.addChild(new Label(Vec2.origin(), AnchorType.TOP_LEFT, () -> "FPS: "+ Raylib.GetFPS()));
+    game.add(
+        label(() -> "FPS: "+ Raylib.GetFPS()),
+        pos(Vec2.origin()),
+        anchor(AnchorType.TOP_LEFT)
+    );
     // add ball
     game.addChild(new Ball(gameData));
   }

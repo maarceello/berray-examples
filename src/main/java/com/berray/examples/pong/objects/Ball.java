@@ -1,9 +1,9 @@
 package com.berray.examples.pong.objects;
 
 import com.berray.GameObject;
-import com.berray.components.AreaComponent;
-import com.berray.components.CircleComponent;
-import com.berray.components.PosComponent;
+import com.berray.components.core.AreaComponent;
+import com.berray.components.core.CircleComponent;
+import com.berray.components.core.PosComponent;
 import com.berray.event.Event;
 import com.berray.examples.pong.data.GameData;
 import com.berray.math.Rect;
@@ -33,8 +33,11 @@ public class Ball extends GameObject {
   }
 
   private void onAdd(Event event) {
-    // now we have access to the game object and can set the start position to the center of the screen
-    set("pos", game.center());
+    GameObject addedObject = event.getParameter(1);
+    if (addedObject == this) {
+      // now we have access to the game object and can set the start position to the center of the screen
+      set("pos", game.center());
+    }
   }
 
   private void onCollideWithPaddle(Event event) {
