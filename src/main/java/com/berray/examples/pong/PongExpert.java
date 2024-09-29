@@ -2,9 +2,11 @@ package com.berray.examples.pong;
 
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
+import com.berray.components.CoreComponentShortcuts;
 import com.berray.components.core.AnchorType;
 import com.berray.examples.pong.data.GameData;
 import com.berray.examples.pong.objects.Ball;
+import com.berray.math.Color;
 import com.berray.math.Vec2;
 import com.raylib.Jaylib;
 import com.raylib.Raylib;
@@ -13,7 +15,7 @@ import static com.berray.components.core.AnchorType.CENTER;
 import static com.berray.objects.core.Label.label;
 
 /** Pong with more object-oriented structure. */
-public class PongExpert extends BerrayApplication {
+public class PongExpert extends BerrayApplication implements CoreComponentShortcuts {
   /** Global game data moved to it's own object. */
   private GameData gameData = new GameData();
 
@@ -21,7 +23,7 @@ public class PongExpert extends BerrayApplication {
   public void initWindow() {
     width(1024);
     height(600);
-    background(Jaylib.GRAY);
+    background(Color.GRAY);
     title("Pong Game - Expert");
   }
 
@@ -35,7 +37,7 @@ public class PongExpert extends BerrayApplication {
     game.onUpdate("paddle", event -> {
       GameObject gameObject = event.getParameter(0);
       Vec2 pos = gameObject.getOrDefault("pos", Vec2.origin());
-      pos.setY(Jaylib.GetMouseY());
+      pos = new Vec2(pos.getX(), Jaylib.GetMouseY());
       gameObject.set("pos", pos);
     });
 

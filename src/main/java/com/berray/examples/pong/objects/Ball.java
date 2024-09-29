@@ -1,6 +1,7 @@
 package com.berray.examples.pong.objects;
 
 import com.berray.GameObject;
+import com.berray.components.CoreComponentShortcuts;
 import com.berray.components.core.AreaComponent;
 import com.berray.components.core.CircleComponent;
 import com.berray.components.core.PosComponent;
@@ -9,7 +10,7 @@ import com.berray.examples.pong.data.GameData;
 import com.berray.math.Rect;
 import com.berray.math.Vec2;
 
-public class Ball extends GameObject {
+public class Ball extends GameObject implements CoreComponentShortcuts {
 
   public static final int RADIUS = 16;
   private final GameData gameData;
@@ -21,7 +22,7 @@ public class Ball extends GameObject {
     addComponents(
         // initialize pos with zero. Once the object is added to the scene, we can get the center
         // center of the screen.
-        PosComponent.pos(0, 0),
+        pos(0, 0),
         CircleComponent.circle(RADIUS),
         AreaComponent.area(new Rect(-RADIUS, -RADIUS, RADIUS * 2, RADIUS * 2))
     );
@@ -65,7 +66,7 @@ public class Ball extends GameObject {
     }
     // if the ball collides with the top or bottom screen, invert the y part of the velocity
     if (pos.getY() < RADIUS || pos.getY() > (game.height() - RADIUS)) {
-      vel.setY(-vel.getY());
+      vel = new Vec2(vel.getX(), -vel.getY());
     }
     set("pos", pos);
     velocity = vel;

@@ -2,13 +2,15 @@ package com.berray.examples.pong;
 
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
+import com.berray.components.CoreComponentShortcuts;
+import com.berray.math.Color;
 import com.berray.math.Rect;
 import com.berray.math.Vec2;
 import com.raylib.Jaylib;
 
 import static com.berray.components.core.AnchorType.CENTER;
 
-public class Pong extends BerrayApplication {
+public class Pong extends BerrayApplication implements CoreComponentShortcuts {
   private int score = 0;
   private int speed = 480;
 
@@ -16,7 +18,7 @@ public class Pong extends BerrayApplication {
   public void initWindow() {
     width(1024);
     height(768);
-    background(Jaylib.GRAY);
+    background(Color.GRAY);
     title("Pong Game");
   }
 
@@ -42,7 +44,7 @@ public class Pong extends BerrayApplication {
     game.onUpdate("paddle", event -> {
       GameObject gameObject = event.getParameter(0);
       Vec2 pos = gameObject.getOrDefault("pos", Vec2.origin());
-      pos.setY(Jaylib.GetMouseY());
+      pos = new Vec2(pos.getX(), Jaylib.GetMouseY());
       gameObject.set("pos", pos);
     });
 
@@ -77,7 +79,7 @@ public class Pong extends BerrayApplication {
         speed = 320;
       }
       if (pos.getY() < 0 || pos.getY() > height()) {
-        vel.setY(-vel.getY());
+        vel = new Vec2(vel.getX(), -vel.getY());
       }
       ball.set("pos", pos);
       ball.setProperty("vel", vel);
