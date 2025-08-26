@@ -1,15 +1,16 @@
 package com.berray.examples.pong.objects;
 
 import com.berray.GameObject;
-import com.berray.components.core.*;
-import com.berray.event.AddEvent;
-import com.berray.event.PhysicsCollideEvent;
+import com.berray.components.CoreComponentShortcuts;
+import com.berray.components.core.AreaComponent;
+import com.berray.components.core.CircleComponent;
+import com.berray.event.Event;
 import com.berray.event.UpdateEvent;
 import com.berray.examples.pong.data.GameData;
 import com.berray.math.Rect;
 import com.berray.math.Vec2;
 
-public class Ball extends GameObject {
+public class Ball extends GameObject implements CoreComponentShortcuts {
 
   public static final int RADIUS = 16;
   private final GameData gameData;
@@ -19,12 +20,11 @@ public class Ball extends GameObject {
     super();
     this.gameData = gameData;
     addComponents(
-        // initialize pos with zero. Once the object is added to the scene, we can get the center
+        // initialize pos with zero. Once the object is added to the scene, we can get the
         // center of the screen.
-        PosComponent2d.pos(0, 0),
+        pos(0, 0),
         CircleComponent.circle(RADIUS),
-        AreaComponent.area(new Rect(-RADIUS, -RADIUS, RADIUS * 2, RADIUS * 2)),
-        AnchorComponent.anchor(AnchorType.CENTER)
+        AreaComponent.area(new Rect(-RADIUS, -RADIUS, RADIUS * 2, RADIUS * 2))
     );
     velocity = Vec2.fromAngle((float) ((Math.random() - 0.5) * 40));
     on("update", this::onUpdate);
@@ -33,18 +33,17 @@ public class Ball extends GameObject {
     onCollide("paddle", this::onCollideWithPaddle);
   }
 
-  private void onAdd(AddEvent event) {
-    // check if its us who was added
-    if (event.getChild() == this) {
+  private void onAdd(Event event) {
+    GameObject addedObject = event.getSource();
+    if (addedObject == this) {
       // now we have access to the game object and can set the start position to the center of the screen
-      Vec2 center = game.center();
-      set("pos", center);
+      set("pos", game.center());
     }
   }
 
-  private void onCollideWithPaddle(PhysicsCollideEvent event) {
+  private void onCollideWithPaddle(Event event) {
     gameData.setSpeed(gameData.getSpeed() + 60);
-    GameObject other = event.getCollisionPartner();
+    GameObject other = event.getSource();
     Vec2 ballPos = get("pos");
     Vec2 otherPos = other.get("pos");
     velocity = Vec2.fromAngle(ballPos.angle(otherPos));

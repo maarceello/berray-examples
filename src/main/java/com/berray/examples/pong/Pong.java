@@ -3,7 +3,6 @@ package com.berray.examples.pong;
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
 import com.berray.components.CoreComponentShortcuts;
-import com.berray.event.PhysicsCollideEvent;
 import com.berray.event.UpdateEvent;
 import com.berray.math.Color;
 import com.berray.math.Rect;
@@ -27,10 +26,6 @@ public class Pong extends BerrayApplication implements CoreComponentShortcuts {
   @Override
   public void game() {
 
-    layers("default", "gui");
-
-    debug = true;
-
     add(
         pos(40, 0),
         rect(20, 80),
@@ -47,7 +42,7 @@ public class Pong extends BerrayApplication implements CoreComponentShortcuts {
         "paddle"
     );
 
-    game.onUpdate("paddle", (UpdateEvent event) -> {
+    game.onUpdate("paddle", event -> {
       GameObject gameObject = event.getSource();
       Vec2 pos = gameObject.getOrDefault("pos", Vec2.origin());
       pos = new Vec2(pos.getX(), Raylib.GetMouseY());
@@ -68,12 +63,11 @@ public class Pong extends BerrayApplication implements CoreComponentShortcuts {
     GameObject ball = add(
         pos(center()),
         circle(16),
-        area(new Rect(-16, -16, 32, 32)),
-        anchor(CENTER)
+        area(new Rect(-16, -16, 32, 32))
     );
     ball.setProperty("vel", Vec2.fromAngle((float) ((Math.random() - 0.5) * 40)));
 
-    ball.on("update", (UpdateEvent event) -> {
+    ball.<UpdateEvent>on("update", event -> {
       float deltaTime = event.getFrametime();
       Vec2 vel = ball.getProperty("vel");
       Vec2 pos = ball.get("pos");
@@ -94,9 +88,9 @@ public class Pong extends BerrayApplication implements CoreComponentShortcuts {
     });
 
     // bounce when touch paddle
-    ball.onCollide("paddle", (PhysicsCollideEvent event) -> {
+    ball.onCollide("paddle", (event) -> {
       speed += 60;
-      GameObject other = event.getCollisionPartner();
+      GameObject other = event.getSource();
       Vec2 ballPos = ball.get("pos");
       Vec2 otherPos = other.get("pos");
       ball.setProperty("vel", Vec2.fromAngle(ballPos.angle(otherPos)));
