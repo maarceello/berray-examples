@@ -2,45 +2,64 @@ package com.berray.examples.pong;
 
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
-import com.berray.components.AnchorType;
+import com.berray.components.CoreComponentShortcuts;
+import com.berray.event.UpdateEvent;
 import com.berray.examples.pong.data.GameData;
 import com.berray.examples.pong.objects.Ball;
-import com.berray.objects.Label;
+import com.berray.math.Color;
 import com.berray.math.Vec2;
-import com.raylib.Jaylib;
 import com.raylib.Raylib;
 
-import static com.berray.components.AnchorType.CENTER;
+import static com.berray.components.core.AnchorType.CENTER;
+import static com.berray.components.core.AnchorType.TOP_LEFT;
+import static com.berray.objects.core.Label.label;
 
-/** Pong with more object-oriented structure. */
-public class PongExpert extends BerrayApplication {
-  /** Global game data moved to it's own object. */
+/**
+ * Pong with more object-oriented structure.
+ */
+public class PongExpert extends BerrayApplication implements CoreComponentShortcuts {
+  /**
+   * Global game data moved to it's own object.
+   */
   private GameData gameData = new GameData();
 
   @Override
   public void initWindow() {
     width(1024);
     height(600);
-    background(Jaylib.GRAY);
+    background(Color.GRAY);
     title("Pong Game - Expert");
   }
 
   @Override
   public void game() {
+    layers("default", "gui");
+    debug = true;
+
     // add paddles left and right
     addPaddle(40);
     addPaddle(width() - 40);
 
     // move paddles with mouse
-    game.onUpdate("paddle", event -> {
-      GameObject gameObject = event.getParameter(0);
-      gameObject.getOrDefault("pos", Vec2.origin()).setY(Jaylib.GetMouseY());
+    game.onUpdate("paddle", (UpdateEvent event) -> {
+      GameObject gameObject = event.getSource();
+      Vec2 pos = gameObject.getOrDefault("pos", Vec2.origin());
+      pos = new Vec2(pos.getX(), Raylib.GetMouseY());
+      gameObject.set("pos", pos);
     });
 
     // add score label to the center of the screen
-    game.addChild(new Label(center(), CENTER, () -> String.valueOf(gameData.getScore())));
+    game.add(
+        label(() -> String.valueOf(gameData.getScore())),
+        pos(center()),
+        anchor(CENTER)
+    );
     // add fps label to top left
-    game.addChild(new Label(Vec2.origin(), AnchorType.TOP_LEFT, () -> "FPS: "+ Raylib.GetFPS()));
+    game.add(
+        label(() -> "FPS: " + Raylib.GetFPS()),
+        pos(Vec2.origin()),
+        anchor(TOP_LEFT)
+    );
     // add ball
     game.addChild(new Ball(gameData));
   }

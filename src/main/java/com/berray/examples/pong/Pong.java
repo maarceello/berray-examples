@@ -2,14 +2,17 @@ package com.berray.examples.pong;
 
 import com.berray.BerrayApplication;
 import com.berray.GameObject;
+import com.berray.components.CoreComponentShortcuts;
+import com.berray.event.PhysicsCollideEvent;
+import com.berray.event.UpdateEvent;
+import com.berray.math.Color;
 import com.berray.math.Rect;
 import com.berray.math.Vec2;
-import com.raylib.Jaylib;
+import com.raylib.Raylib;
 
-import static com.berray.AssetManager.loadSprite;
-import static com.berray.components.AnchorType.CENTER;
+import static com.berray.components.core.AnchorType.CENTER;
 
-public class Pong extends BerrayApplication {
+public class Pong extends BerrayApplication implements CoreComponentShortcuts {
   private int score = 0;
   private int speed = 480;
 
@@ -17,12 +20,16 @@ public class Pong extends BerrayApplication {
   public void initWindow() {
     width(1024);
     height(768);
-    background(Jaylib.GRAY);
+    background(Color.GRAY);
     title("Pong Game");
   }
 
   @Override
   public void game() {
+
+    layers("default", "gui");
+
+    debug = true;
 
     add(
         pos(40, 0),
@@ -40,9 +47,11 @@ public class Pong extends BerrayApplication {
         "paddle"
     );
 
-    game.onUpdate("paddle", event -> {
-      GameObject gameObject = event.getParameter(0);
-      gameObject.getOrDefault("pos", Vec2.origin()).setY(Jaylib.GetMouseY());
+    game.onUpdate("paddle", (UpdateEvent event) -> {
+      GameObject gameObject = event.getSource();
+      Vec2 pos = gameObject.getOrDefault("pos", Vec2.origin());
+      pos = new Vec2(pos.getX(), Raylib.GetMouseY());
+      gameObject.set("pos", pos);
     });
 
     // score counter
@@ -59,12 +68,13 @@ public class Pong extends BerrayApplication {
     GameObject ball = add(
         pos(center()),
         circle(16),
-        area(new Rect(-16, -16, 32, 32))
+        area(new Rect(-16, -16, 32, 32)),
+        anchor(CENTER)
     );
     ball.setProperty("vel", Vec2.fromAngle((float) ((Math.random() - 0.5) * 40)));
 
-    ball.on("update", event -> {
-      float deltaTime = event.getParameter(0);
+    ball.on("update", (UpdateEvent event) -> {
+      float deltaTime = event.getFrametime();
       Vec2 vel = ball.getProperty("vel");
       Vec2 pos = ball.get("pos");
       pos = pos.move(vel.scale(speed * deltaTime));
@@ -76,7 +86,7 @@ public class Pong extends BerrayApplication {
         speed = 320;
       }
       if (pos.getY() < 0 || pos.getY() > height()) {
-        vel.setY(-vel.getY());
+        vel = new Vec2(vel.getX(), -vel.getY());
       }
       ball.set("pos", pos);
       ball.setProperty("vel", vel);
@@ -84,9 +94,9 @@ public class Pong extends BerrayApplication {
     });
 
     // bounce when touch paddle
-    ball.onCollide("paddle", (event) -> {
+    ball.onCollide("paddle", (PhysicsCollideEvent event) -> {
       speed += 60;
-      GameObject other = event.getParameter(0);
+      GameObject other = event.getCollisionPartner();
       Vec2 ballPos = ball.get("pos");
       Vec2 otherPos = other.get("pos");
       ball.setProperty("vel", Vec2.fromAngle(ballPos.angle(otherPos)));
