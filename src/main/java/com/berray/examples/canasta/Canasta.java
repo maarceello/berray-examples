@@ -14,17 +14,21 @@ import com.berray.event.UpdateEvent;
 import com.berray.math.Color;
 import com.berray.math.Vec2;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.berray.examples.canasta.CardStackComponent.cardStack;
+import static com.berray.examples.canasta.DragComponent.draggable;
 
 public class Canasta extends BerrayApplication implements CoreComponentShortcuts, CoreAssetShortcuts, CoreEvents {
     private AnimationManager animationManager;
 
-    private Vec2 cardSize = new Vec2(56, 80);
+    private Vec2 cardSize = new Vec2(65, 80);
 
     @Override
     public void initWindow() {
-        width(2000);
+        width(1500);
         height(768);
         background(Color.GRAY);
         title("Canasta Card Game");
@@ -36,7 +40,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 
         this.animationManager = new AnimationManager();
 
-        List<Card> deck = new CardDeck().fullDeck();
+        List<Card> deck = fullDeck();
         Collections.shuffle(deck);
 
 
@@ -47,8 +51,11 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
             }
         });
 
+        CardStack stack = new CardStack("Ablagestapel");
+
         for (int x = 0; x < 14; x++) {
             Card card = deck.get(x);
+            stack.addCard(card);
             int frame = card.getCardSuit().ordinal() * 14 + card.getCardValue().ordinal() + 1;
 
             GameObject cardObject = add(
@@ -58,10 +65,11 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     property("card", card),
                     pos(x * 65+33, 80),
                     area(),
-                    mouse()
+                    mouse(),
+                    draggable()
             );
 
-            GameObject cardSprite = cardObject.add(
+            cardObject.add(
                     "cardSprite",
                     anchor(AnchorType.CENTER),
                     pos(cardSize.scale(0.5f)),
@@ -71,9 +79,28 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
             );
             cardObject.on(CoreEvents.HOVER_ENTER, this::onHoverEnter);
             cardObject.on(CoreEvents.HOVER_LEAVE, this::onHoverLeave);
-            cardObject.on(CoreEvents.DRAG_START, this::onDragStart);
-            cardObject.on(CoreEvents.DRAGGING, this::onDragging);
         }
+
+        GameObject cardStack = add(
+            pos(500, 100),
+            cardStack(stack),
+            area(),
+            mouse(),
+            draggable(),
+            droptarget()
+        );
+
+        cardStack.on("dropped", event -> {
+            GameObject dropTarget = event.getSource();
+            CardStack dropStack = dropTarget.get("cards");
+            GameObject droppedObject = (GameObject) event.getParameters().get(2);
+            Card card =  droppedObject.getProperty("card");
+            dropStack.addCard(card);
+
+            droppedObject.destroy();
+
+        });
+
     }
 
     private void onHoverEnter(Event event) {
@@ -114,16 +141,15 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
         }
     }
 
-    private void onDragStart(MouseEvent event) {
-        GameObject source = event.getSource();
-        source.setProperty("dragDelta", source.<Vec2>get("pos").sub(event.getWindowPos()));
+    public List<Card> fullDeck() {
+        List<Card> result = new ArrayList<>();
+        for (CardSuit suit : CardSuit.values()) {
+            for (CardRank value : CardRank.values()) {
+                result.add(new Card(suit, value));
+            }
+        }
+        return result;
     }
-
-    private void onDragging(MouseEvent event) { {
-        GameObject source = event.getSource();
-        Vec2 dragDelta = source.getProperty("dragDelta");
-        source.set("pos", event.getWindowPos().add(dragDelta));
-    }}
 
     public static void main(String[] args) {
         new Canasta().runGame();
