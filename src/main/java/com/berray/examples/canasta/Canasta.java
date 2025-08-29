@@ -1,15 +1,13 @@
 package com.berray.examples.canasta;
 
 
-import com.berray.BerrayApplication;
-import com.berray.GameObject;
+import com.berray.*;
 import com.berray.assets.CoreAssetShortcuts;
 import com.berray.assets.SpriteSheet;
 import com.berray.components.CoreComponentShortcuts;
 import com.berray.components.core.AnchorType;
 import com.berray.event.CoreEvents;
 import com.berray.event.Event;
-import com.berray.event.MouseEvent;
 import com.berray.event.UpdateEvent;
 import com.berray.math.Color;
 import com.berray.math.Vec2;
@@ -20,11 +18,11 @@ import java.util.List;
 
 import static com.berray.examples.canasta.CardStackComponent.cardStack;
 import static com.berray.examples.canasta.DragComponent.draggable;
+import static com.berray.examples.canasta.DropTargetComponent.dropTarget;
 
 public class Canasta extends BerrayApplication implements CoreComponentShortcuts, CoreAssetShortcuts, CoreEvents {
-    private AnimationManager animationManager;
 
-    private Vec2 cardSize = new Vec2(65, 80);
+    private final Vec2 cardSize = new Vec2(56, 80);
 
     @Override
     public void initWindow() {
@@ -36,9 +34,9 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 
     @Override
     public void game() {
-        loadSpriteSheet("cards", "resources/kerenel_Cards.png", SpriteSheet.spriteSheet().sliceX(14).sliceY(6));
+        layers(Game.DEFAULT_LAYER, "dragLayer");
 
-        this.animationManager = new AnimationManager();
+        loadSpriteSheet("cards", "resources/kerenel_Cards.png", SpriteSheet.spriteSheet().sliceX(14).sliceY(6));
 
         List<Card> deck = fullDeck();
         Collections.shuffle(deck);
@@ -47,7 +45,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 
         game.on("update", (UpdateEvent event) -> {
             if (event.getSource() == null) {
-            animationManager.animationUpdate(event);
+                game.getAnimationManager().animationUpdate(event);
             }
         });
 
@@ -59,11 +57,13 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
             int frame = card.getCardSuit().ordinal() * 14 + card.getCardValue().ordinal() + 1;
 
             GameObject cardObject = add(
+                    "card",
                     rect(cardSize).fill(false),
                     color(Color.GOLD),
                     anchor(AnchorType.TOP_LEFT),
                     property("card", card),
                     pos(x * 65+33, 80),
+                    layer(Game.DEFAULT_LAYER),
                     area(),
                     mouse(),
                     draggable()
@@ -74,11 +74,11 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     anchor(AnchorType.CENTER),
                     pos(cardSize.scale(0.5f)),
                     sprite("cards").frame(frame),
-                    scale(1.0f),
-                    new FlipComponent(frame, 3*14)
+                    scale(1.0f)
+//                    new FlipComponent(frame, 3*14)
             );
-            cardObject.on(CoreEvents.HOVER_ENTER, this::onHoverEnter);
-            cardObject.on(CoreEvents.HOVER_LEAVE, this::onHoverLeave);
+//            cardObject.on(CoreEvents.HOVER_ENTER, this::onHoverEnter);
+//            cardObject.on(CoreEvents.HOVER_LEAVE, this::onHoverLeave);
         }
 
         GameObject cardStack = add(
@@ -87,20 +87,8 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
             area(),
             mouse(),
             draggable(),
-            droptarget()
+            dropTarget("card")
         );
-
-        cardStack.on("dropped", event -> {
-            GameObject dropTarget = event.getSource();
-            CardStack dropStack = dropTarget.get("cards");
-            GameObject droppedObject = (GameObject) event.getParameters().get(2);
-            Card card =  droppedObject.getProperty("card");
-            dropStack.addCard(card);
-
-            droppedObject.destroy();
-
-        });
-
     }
 
     private void onHoverEnter(Event event) {
@@ -118,7 +106,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     (a, b) -> a - b
             );
 
-            animationManager.addAnimation(cardSprite, animationData);
+            game.getAnimationManager().addAnimation(cardSprite, animationData);
         }
     }
 
@@ -137,7 +125,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     (a, b) -> a - b
             );
 
-            animationManager.addAnimation(cardSprite, animationData);
+            game.getAnimationManager().addAnimation(cardSprite, animationData);
         }
     }
 
