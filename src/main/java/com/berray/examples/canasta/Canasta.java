@@ -43,8 +43,6 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
         List<Card> deck = fullDeck();
         Collections.shuffle(deck);
 
-
-
         game.on("update", (UpdateEvent event) -> {
             if (event.getSource() == null) {
                 game.getAnimationManager().animationUpdate(event);
@@ -52,8 +50,6 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
         });
 
         CardStack stack = new CardStack("Ablagestapel");
-
-
 
         for (int x = 0; x < 14; x++) {
             Card card = deck.get(x);
@@ -79,8 +75,8 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     anchor(AnchorType.CENTER),
                     pos(cardSize.scale(0.5f)),
                     sprite("cards").frame(frame),
-                    scale(1.0f)
-//                    new FlipComponent(frame, 3*14)
+                    scale(1.0f),
+                    new FlipComponent(frame, 3*14)
             );
         }
 
@@ -96,57 +92,47 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
         // Draw the arc of cards at the bottom of the screen
         int screenCenter = width() / 2;
         int arcRadius = 300;
-        float arcAngle = 90; // degrees
+        float arcAngle = 60; // degrees
 
-        drawCardArc(stack.getCards(), screenCenter, height()/2, arcRadius, arcAngle);
+        drawCardArc(stack.getCards(), screenCenter, height()+200, arcRadius, arcAngle);
     }
 
     // Function to draw cards in an arc
     private List<GameObject> drawCardArc(List<Card> cards, int x, int y, int radius, float totalAngle) {
-        float angleStep = toRadians(cards.isEmpty() ? 1 : totalAngle / (cards.size()));
+        float angleStep = toRadians(cards.size() < 2 ? 1 : totalAngle / (cards.size()-1));
         float startAngle = toRadians(-totalAngle / 2);
 
         List<GameObject> cardObjects = new ArrayList<>();
 
-        add(
-                pos(x,y),
-                circle(radius),
-                color(Color.GOLD),
-                anchor(AnchorType.CENTER)
-        );
-
         float zeroAngle = (float) (Math.PI / 2 + Math.PI);
         float start = zeroAngle - toRadians(totalAngle/2);
 
-
         for (int i = 0; i < cards.size(); i++) {
             float angle = startAngle + (i * angleStep);
-            float xPos = x + radius * sin(angle);
-            float yPos = y + radius * cos(angle);
-
-            add(
-                    pos(x + cos(start + angleStep * i) * radius, y + sin(start + angleStep * i) * radius),
-                    circle(10),
-                    color(Color.GREEN),
-                    anchor(AnchorType.CENTER)
-            );
-
 
             Card card = cards.get(i);
             int frame = card.getCardSuit().ordinal() * 14 + card.getCardValue().ordinal() + 1;
 
-            // Create a card object
-            GameObject cardObj = add(
+            float xPos = x + cos(start + angleStep * i) * radius;
+            float yPos = y + sin(start + angleStep * i) * radius;
+            GameObject cardObject = add(
                     pos(xPos, yPos),
-                    area(),
-                    rotate(angle),
+                    rect(cardSize),
+                    color(Color.GREEN),
                     anchor(AnchorType.CENTER),
-                    sprite("cards").frame(frame),
-                    z(i), // Ensure cards overlap correctly
-                    property("originalPos", new Vec2(xPos, yPos)),
-                    property("isSelected", false)
+                    rotate(toDegrees(angle)),
+                    scale(1.0f),
+                    area(),
+                    mouse()
             );
 
+            cardObject.add(
+                "cardSprite",
+                anchor(AnchorType.CENTER),
+                pos(cardSize.scale(0.5f)),
+                sprite("cards").frame(frame),
+                scale(1.0f)
+            );
 
 //            // Make cards interactive
 //            cardObj.onClick(() => {
@@ -160,15 +146,15 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 //            }
 //    });
 
-            cardObj.on(HOVER_ENTER,  (event) -> {
-                    cardObj.set("scale", new Vec2(1.05f, 1.05f));
+            cardObject.on(HOVER_ENTER,  (event) -> {
+                    cardObject.set("scale", new Vec2(1.1f, 1.1f));
             });
 
-            cardObj.on(HOVER_LEAVE, (event) -> {
-                cardObj.set("scale", new Vec2(1.0f, 1.0f));
+            cardObject.on(HOVER_LEAVE, (event) -> {
+                cardObject.set("scale", new Vec2(1.0f, 1.0f));
             });
 
-            cardObjects.add(cardObj);
+            cardObjects.add(cardObject);
         }
 
         return cardObjects;
