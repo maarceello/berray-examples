@@ -11,6 +11,7 @@ import com.berray.components.CoreComponentShortcuts;
 import com.berray.components.core.AnchorType;
 import com.berray.event.CoreEvents;
 import com.berray.event.Event;
+import com.berray.event.MouseEvent;
 import com.berray.event.UpdateEvent;
 import com.berray.math.Color;
 import com.berray.math.Vec2;
@@ -19,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.berray.examples.canasta.CardStackComponent.cardStack;
 import static com.berray.examples.canasta.DragComponent.draggable;
+import static com.berray.examples.canasta.DropTargetComponent.dropTarget;
 import static com.berray.math.MathUtil.*;
 
 public class Canasta extends BerrayApplication implements CoreComponentShortcuts, CoreAssetShortcuts, CoreEvents {
@@ -80,14 +83,14 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
             );
         }
 
-//        add(
-//            pos(530, 240),
-//            cardStack(stack),
-//            area(),
-//            mouse(),
-//            draggable(),
-//            dropTarget("card")
-//        );
+        add(
+            pos(530, 240),
+            cardStack(stack),
+            area(),
+            mouse(),
+            draggable(),
+            dropTarget("card")
+        );
 
         // Draw the arc of cards at the bottom of the screen
         int screenCenter = width() / 2;
@@ -123,10 +126,11 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     rotate(toDegrees(angle)),
                     scale(1.0f),
                     area(),
-                    mouse()
+                    mouse(),
+                    z(i)
             );
 
-            cardObject.add(
+            GameObject cardSprite = cardObject.add(
                 "cardSprite",
                 anchor(AnchorType.CENTER),
                 pos(cardSize.scale(0.5f)),
@@ -147,11 +151,15 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 //    });
 
             cardObject.on(HOVER_ENTER,  (event) -> {
-                    cardObject.set("scale", new Vec2(1.1f, 1.1f));
+                cardSprite.animate("scale2d", new Vec2(1.5f, 1.5f), 0.2f);
+            });
+
+            cardObject.on(HOVER,  (MouseEvent event) -> {
+                event.consume();
             });
 
             cardObject.on(HOVER_LEAVE, (event) -> {
-                cardObject.set("scale", new Vec2(1.0f, 1.0f));
+                cardSprite.animate("scale2d", new Vec2(1.0f, 1.0f), 0.2f);
             });
 
             cardObjects.add(cardObject);

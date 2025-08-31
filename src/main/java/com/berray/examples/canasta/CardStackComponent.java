@@ -1,6 +1,5 @@
 package com.berray.examples.canasta;
 
-import com.berray.AnimationData;
 import com.berray.GameObject;
 import com.berray.assets.Asset;
 import com.berray.assets.SpriteSheet;
@@ -42,23 +41,14 @@ public class CardStackComponent extends Component {
       // move card to end of stack
       Vec2 endOfStack = gameObject.get("pos", Vec2.origin()).add(new Vec2(0, 20).scale(cards.getCards().size()));
 
-      AnimationData<Vec2> animationData = new AnimationData<>(
-              "pos",
-              source.get("pos"),
-              endOfStack,
-              0.2f,
-              Vec2::scale,
-              Vec2::add,
-              Vec2::sub
-      );
-
       // move the card to the end of the stack
-      getAnimationManager().addAnimation(source, animationData);
+      source.animate("pos", endOfStack, 0.2f);
 
       // when the animation is done, remove the card from the table and add it to the stack
       source.on(CoreEvents.ANIMATION_END, (AnimationEvent e) -> {
         cards.addCard(card);
         gameObject.getGame().destroy(source);
+        gameObject.setTransformDirty();
       });
     }
   }
