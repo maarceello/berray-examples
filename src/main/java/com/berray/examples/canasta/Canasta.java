@@ -1,10 +1,7 @@
 package com.berray.examples.canasta;
 
 
-import com.berray.AnimationData;
-import com.berray.BerrayApplication;
-import com.berray.Game;
-import com.berray.GameObject;
+import com.berray.*;
 import com.berray.assets.CoreAssetShortcuts;
 import com.berray.assets.SpriteSheet;
 import com.berray.components.CoreComponentShortcuts;
@@ -151,7 +148,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 //    });
 
             cardObject.on(HOVER_ENTER,  (event) -> {
-                cardSprite.animate("scale2d", new Vec2(1.5f, 1.5f), 0.2f);
+                cardSprite.animate("scale2d", new Vec2(1.5f, 1.5f), 0.5f, EasingFunctions.EASE_OUT_ELASTIC);
             });
 
             cardObject.on(HOVER,  (MouseEvent event) -> {
@@ -159,7 +156,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
             });
 
             cardObject.on(HOVER_LEAVE, (event) -> {
-                cardSprite.animate("scale2d", new Vec2(1.0f, 1.0f), 0.2f);
+                cardSprite.animate("scale2d", new Vec2(1.0f, 1.0f), 0.5f, EasingFunctions.EASE_OUT_ELASTIC);
             });
 
             cardObjects.add(cardObject);
@@ -178,6 +175,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     cardSprite.<Float>get("sideVisible"),
                     -1.0f,
                     0.2f,
+                    EasingFunctions.EASE_OUT_ELASTIC,
                     (f, scale) -> f * scale,
                     (a, b) -> a + b,
                     (a, b) -> a - b
@@ -197,6 +195,7 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     cardSprite.<Float>get("sideVisible"),
                     1.0f,
                     0.2f,
+                    EasingFunctions.EASE_OUT_ELASTIC,
                     (f, scale) -> f * scale,
                     (a, b) -> a + b,
                     (a, b) -> a - b
