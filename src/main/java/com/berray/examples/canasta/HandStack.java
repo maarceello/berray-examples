@@ -64,14 +64,14 @@ public class HandStack extends Component implements CoreComponentShortcuts {
 
     private void addCard(AddCardAction action) {
         Card newCard = action.getNewCard();
-        int position = action.getPosition();
         List<Card> cards = stack.getCards();
+        int position = (int) (Math.random() * cards.size());
 
         // add card to list of cards
         cards.add(position, newCard);
         // create game object
         GameObject cardObject = gameObject.add(
-                pos(0, 0),
+                pos(radius,  radius),
                 rect(Canasta.cardSize),
                 color(Color.GREEN),
                 anchor(AnchorType.CENTER),
@@ -99,29 +99,22 @@ public class HandStack extends Component implements CoreComponentShortcuts {
 
         // calculate the step the card are from each other. be sure to clamp the angle to maxAngle when the hand only has
         // few cards.
-        float angleStep = cards.size() < 2 ? 0 :  Math.max(maxAngle, totalAngle / (cards.size()-1));
+        float angleStep = cards.size() < 2 ? 0 :  Math.min(maxAngle, totalAngle / (cards.size()-1));
 
         // start angle of the first card (where 0.0 is the top of the circle)
         // the angle is negative, so the cards start left from 0.0
         float startAngle = -((cards.size() / 2.0f) * angleStep);
 
-        // angle of the top point of the circle of sin/cos
-        float zeroAngle = 270.0f;
-
-        System.out.println(angleStep+" "+startAngle+" "+zeroAngle);
-
         // go over all card objects and move them to their correct position
         for (int i = 0; i < children.size(); i++) {
             GameObject card = children.get(i);
-            float angle = zeroAngle - startAngle + angleStep * i;
-            float xPos = cos(toRadians(angle)) * radius;
-            float yPos = sin(toRadians(angle)) * radius;
+            float angle = startAngle + angleStep * i - 90;
+            float xPos = cos(toRadians(angle)) * radius + radius;
+            float yPos = sin(toRadians(angle)) * radius + radius;
 
-            System.out.println(i+" "+angle+" "+xPos+" "+yPos);
-
-            card.set("pos", new Vec2(xPos, yPos - height)); // , 0.3f, EasingFunctions.EASE_OUT_ELASTIC
+            card.animate("pos", new Vec2(xPos, yPos), 1f, EasingFunctions.EASE_OUT_QUADRATIC);
+            card.animate("angle", angle - 90, 2f, EasingFunctions.EASE_OUT_QUADRATIC);
             card.set("z", i);
-            card.set("angle", angleStep * i);
             card.setTransformDirty();
         }
     }

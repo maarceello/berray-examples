@@ -47,9 +47,10 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
         });
 
         GameObject handStack = add(
-                pos(500, 500),
-                rect(400, 100).fill(false),
-                new HandStack()
+            pos(width() / 2, height() / 2),
+            rect(600, 300).fill(false),
+            anchor(AnchorType.CENTER),
+            new HandStack()
         );
 
 
