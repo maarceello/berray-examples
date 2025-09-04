@@ -1,0 +1,128 @@
+package com.berray.examples.canasta;
+
+import com.berray.EasingFunctions;
+import com.berray.GameObject;
+import com.berray.components.CoreComponentShortcuts;
+import com.berray.components.core.Action;
+import com.berray.components.core.AnchorType;
+import com.berray.components.core.Component;
+import com.berray.math.Color;
+import com.berray.math.Vec2;
+
+import java.util.List;
+
+import static com.berray.math.MathUtil.*;
+import static com.berray.math.MathUtil.sin;
+
+public class HandStack extends Component implements CoreComponentShortcuts {
+
+    private CardStack stack = new CardStack("hand");
+
+    /** Radius of the circle on which the cards are placed. */
+    private int radius = 300;
+    /** Max angle of the arc with the cards. The arc is centered on the top most point of the circle. */
+    private float totalAngle = 60;
+    /**
+     * Max angle the cards are placed from one another. If there are very few cards, the are placed this angle
+     * from each other.
+     */
+    private float maxAngle = 5;
+
+    /** Distance of the center of the circle from the bottom of the stack object. */
+    private int height = 200; // maybe calculate from radius and total angle
+
+    public HandStack() {
+        super("hand-stack");
+    }
+
+    @Override
+    public void add(GameObject gameObject) {
+        super.add(gameObject);
+        registerAction("addCard", this::addCard, AddCardAction::new);
+//        registerGetter("size", this::getSize);
+    }
+
+    private Vec2 getSize() {
+        // todo: calculate size from radius, totalAngle and height
+        return new Vec2(300, 200);
+    }
+
+    private static class AddCardAction extends Action {
+
+        public AddCardAction(List<Object> params) {
+            super(params);
+        }
+
+        public Card getNewCard() {
+            return getParameter(0);
+        }
+
+        public int getPosition() {
+            return getParameter(1);
+        }
+    }
+
+    private void addCard(AddCardAction action) {
+        Card newCard = action.getNewCard();
+        int position = action.getPosition();
+        List<Card> cards = stack.getCards();
+
+        // add card to list of cards
+        cards.add(position, newCard);
+        // create game object
+        GameObject cardObject = gameObject.add(
+                pos(0, 0),
+                rect(Canasta.cardSize),
+                color(Color.GREEN),
+                anchor(AnchorType.CENTER),
+                rotate(0),
+                scale(1.0f),
+                area(),
+                mouse(),
+                z(0)
+        );
+
+        int frame = newCard.getCardSuit().ordinal() * 14 + newCard.getCardValue().ordinal() + 1;
+        GameObject cardSprite = cardObject.add(
+                "cardSprite",
+                anchor(AnchorType.CENTER),
+                pos(Canasta.cardSize.scale(0.5f)),
+                sprite("cards").frame(frame),
+                scale(1.0f)
+        );
+
+
+        // game object was added to the end of the children list. move the game object to the correct position
+        List<GameObject> children = gameObject.getChildren();
+        children.remove(cardObject); // note: this does a linear scan, but as the operation is seldom, it shouldn't be a problem
+        children.add(position, cardObject);
+
+        // calculate the step the card are from each other. be sure to clamp the angle to maxAngle when the hand only has
+        // few cards.
+        float angleStep = cards.size() < 2 ? 0 :  Math.max(maxAngle, totalAngle / (cards.size()-1));
+
+        // start angle of the first card (where 0.0 is the top of the circle)
+        // the angle is negative, so the cards start left from 0.0
+        float startAngle = -((cards.size() / 2.0f) * angleStep);
+
+        // angle of the top point of the circle of sin/cos
+        float zeroAngle = 270.0f;
+
+        System.out.println(angleStep+" "+startAngle+" "+zeroAngle);
+
+        // go over all card objects and move them to their correct position
+        for (int i = 0; i < children.size(); i++) {
+            GameObject card = children.get(i);
+            float angle = zeroAngle - startAngle + angleStep * i;
+            float xPos = cos(toRadians(angle)) * radius;
+            float yPos = sin(toRadians(angle)) * radius;
+
+            System.out.println(i+" "+angle+" "+xPos+" "+yPos);
+
+            card.set("pos", new Vec2(xPos, yPos - height)); // , 0.3f, EasingFunctions.EASE_OUT_ELASTIC
+            card.set("z", i);
+            card.set("angle", angleStep * i);
+            card.setTransformDirty();
+        }
+    }
+}

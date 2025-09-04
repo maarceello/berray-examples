@@ -24,12 +24,10 @@ public class DropTargetComponent extends Component {
 
   private void onDragEnter(Event event) {
     this.dropHovered = true;
-    System.out.println("drag enter");
   }
 
   private void onDragLeave(Event event) {
     this.dropHovered = false;
-    System.out.println("drag leave");
   }
 
   public boolean isDropHovered() {

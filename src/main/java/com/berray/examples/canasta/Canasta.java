@@ -17,14 +17,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.berray.examples.canasta.CardStackComponent.cardStack;
 import static com.berray.examples.canasta.DragComponent.draggable;
-import static com.berray.examples.canasta.DropTargetComponent.dropTarget;
 import static com.berray.math.MathUtil.*;
 
 public class Canasta extends BerrayApplication implements CoreComponentShortcuts, CoreAssetShortcuts, CoreEvents {
 
-    private final Vec2 cardSize = new Vec2(56, 80);
+    public  static final Vec2 cardSize = new Vec2(56, 80);
 
     @Override
     public void initWindow() {
@@ -42,12 +40,18 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 
         List<Card> deck = fullDeck();
         Collections.shuffle(deck);
-
         game.on("update", (UpdateEvent event) -> {
             if (event.getSource() == null) {
                 game.getAnimationManager().animationUpdate(event);
             }
         });
+
+        GameObject handStack = add(
+                pos(500, 500),
+                rect(400, 100).fill(false),
+                new HandStack()
+        );
+
 
         CardStack stack = new CardStack("Ablagestapel");
 
@@ -78,26 +82,33 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     scale(1.0f),
                     new FlipComponent(frame, 3*14)
             );
+
+            cardObject.on(CoreEvents.MOUSE_CLICK, (event) -> {
+                GameObject source = event.getSource();
+                Card localCard = source.getProperty("card");
+                handStack.doAction("addCard", localCard, 0);
+            });
         }
 
-        add(
-            pos(530, 240),
-            cardStack(stack),
-            area(),
-            mouse(),
-            draggable(),
-            dropTarget("card")
-        );
+//        add(
+//            pos(530, 240),
+//            cardStack(stack),
+//            area(),
+//            mouse(),
+//            draggable(),
+//            dropTarget("card")
+//        );
 
         // Draw the arc of cards at the bottom of the screen
         int screenCenter = width() / 2;
         int arcRadius = 300;
         float arcAngle = 60; // degrees
 
-        drawCardArc(stack.getCards(), screenCenter, height()+200, arcRadius, arcAngle);
+//        drawCardArc(stack.getCards(), screenCenter, height()+200, arcRadius, arcAngle);
+
+
     }
 
-    // Function to draw cards in an arc
     private List<GameObject> drawCardArc(List<Card> cards, int x, int y, int radius, float totalAngle) {
         float angleStep = toRadians(cards.size() < 2 ? 1 : totalAngle / (cards.size()-1));
         float startAngle = toRadians(-totalAngle / 2);

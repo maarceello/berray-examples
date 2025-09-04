@@ -76,7 +76,7 @@ public class CardStackComponent extends Component {
     if (cards.getCards().isEmpty()) {
       return new Vec2(1,1);
     }
-    return new Vec2(65, 80 + (cards.getCards().size() - 1) * 20);
+    return new Vec2(56, 80 + (cards.getCards().size() - 1) * 20);
   }
 
   public CardStack getCards() {
