@@ -64,8 +64,9 @@ public class HandStack extends Component implements CoreComponentShortcuts {
 
     private void addCard(AddCardAction action) {
         Card newCard = action.getNewCard();
+        int position = action.getPosition();
+
         List<Card> cards = stack.getCards();
-        int position = (int) (Math.random() * cards.size());
 
         // add card to list of cards
         cards.add(position, newCard);
@@ -82,15 +83,22 @@ public class HandStack extends Component implements CoreComponentShortcuts {
                 z(0)
         );
 
+        cardObject.on(DragComponent.EVENT_DRAG_ENTER, (event -> {
+            event.getSource().getChild("cardSprite").set("color", Color.GRAY);
+        }));
+        cardObject.on(DragComponent.EVENT_DRAG_LEAVE, (event -> {
+            event.getSource().getChild("cardSprite").set("color", Color.WHITE);
+        }));
+
         int frame = newCard.getCardSuit().ordinal() * 14 + newCard.getCardValue().ordinal() + 1;
         GameObject cardSprite = cardObject.add(
                 "cardSprite",
                 anchor(AnchorType.CENTER),
                 pos(Canasta.cardSize.scale(0.5f)),
                 sprite("cards").frame(frame),
+                color(Color.WHITE),
                 scale(1.0f)
         );
-
 
         // game object was added to the end of the children list. move the game object to the correct position
         List<GameObject> children = gameObject.getChildren();
@@ -113,7 +121,7 @@ public class HandStack extends Component implements CoreComponentShortcuts {
             float yPos = sin(toRadians(angle)) * radius + radius;
 
             card.animate("pos", new Vec2(xPos, yPos), 1f, EasingFunctions.EASE_OUT_QUADRATIC);
-            card.animate("angle", angle - 90, 2f, EasingFunctions.EASE_OUT_QUADRATIC);
+            card.animate("angle", (angle - 90 + 360) % 360, 2f, EasingFunctions.EASE_OUT_QUADRATIC);
             card.set("z", i);
             card.setTransformDirty();
         }

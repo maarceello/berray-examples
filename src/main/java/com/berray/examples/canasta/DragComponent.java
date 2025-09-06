@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DragComponent extends Component {
+  public static final String EVENT_DRAG_LEAVE = "drag_leave";
+  public static final String EVENT_DRAG_ENTER = "drag_enter";
   private String dragLayer = "dragLayer";
 
   /** true when the component is currently dragged. */
@@ -62,7 +64,7 @@ public class DragComponent extends Component {
     if (!hoveredDropTargets.isEmpty()) {
       // First tell all current hovered drop targets that the drag is finished
       for (GameObject dropTarget : hoveredDropTargets.values()) {
-        dropTarget.trigger("drag_leave", this);
+        dropTarget.trigger(EVENT_DRAG_LEAVE, dropTarget);
       }
 
       // Then send drop event to the drop targets. When the drop event is consumed, stop notifying the remaining objects
@@ -85,7 +87,7 @@ public class DragComponent extends Component {
     GameObject other = event.getCollisionPartner();
     hoveredDropTargets.put(other.getId(), other);
     // send collision partner a drag_enter event, as the
-    event.getCollisionPartner().trigger("drag_enter", this);
+    event.getCollisionPartner().trigger(EVENT_DRAG_ENTER, other);
   }
 
   private void onCollideEnd(PhysicsCollideEndEvent event) {
@@ -95,7 +97,7 @@ public class DragComponent extends Component {
     GameObject other = event.getCollision().getOther();
     if (other != null) {
       hoveredDropTargets.remove(other.getId());
-      other.trigger("drag_leave", this);
+      other.trigger(EVENT_DRAG_LEAVE, other);
     }
   }
 

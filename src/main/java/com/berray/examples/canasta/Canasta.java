@@ -8,7 +8,6 @@ import com.berray.components.CoreComponentShortcuts;
 import com.berray.components.core.AnchorType;
 import com.berray.event.CoreEvents;
 import com.berray.event.Event;
-import com.berray.event.MouseEvent;
 import com.berray.event.UpdateEvent;
 import com.berray.math.Color;
 import com.berray.math.Vec2;
@@ -18,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.berray.examples.canasta.DragComponent.draggable;
-import static com.berray.math.MathUtil.*;
 
 public class Canasta extends BerrayApplication implements CoreComponentShortcuts, CoreAssetShortcuts, CoreEvents {
 
@@ -56,6 +54,10 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
 
         CardStack stack = new CardStack("Ablagestapel");
 
+        for (int x = 14; x < 28; x++) {
+            handStack.doAction("addCard", deck.get(x), 0);
+        }
+
         for (int x = 0; x < 14; x++) {
             Card card = deck.get(x);
             stack.addCard(card);
@@ -84,11 +86,11 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
                     new FlipComponent(frame, 3*14)
             );
 
-            cardObject.on(CoreEvents.MOUSE_CLICK, (event) -> {
-                GameObject source = event.getSource();
-                Card localCard = source.getProperty("card");
-                handStack.doAction("addCard", localCard, 0);
-            });
+//            cardObject.on(CoreEvents.MOUSE_CLICK, (event) -> {
+//                GameObject source = event.getSource();
+//                Card localCard = source.getProperty("card");
+//                handStack.doAction("addCard", localCard, 0);
+//            });
         }
 
 //        add(
@@ -105,76 +107,6 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
         int arcRadius = 300;
         float arcAngle = 60; // degrees
 
-//        drawCardArc(stack.getCards(), screenCenter, height()+200, arcRadius, arcAngle);
-
-
-    }
-
-    private List<GameObject> drawCardArc(List<Card> cards, int x, int y, int radius, float totalAngle) {
-        float angleStep = toRadians(cards.size() < 2 ? 1 : totalAngle / (cards.size()-1));
-        float startAngle = toRadians(-totalAngle / 2);
-
-        List<GameObject> cardObjects = new ArrayList<>();
-
-        float zeroAngle = (float) (Math.PI / 2 + Math.PI);
-        float start = zeroAngle - toRadians(totalAngle/2);
-
-        for (int i = 0; i < cards.size(); i++) {
-            float angle = startAngle + (i * angleStep);
-
-            Card card = cards.get(i);
-            int frame = card.getCardSuit().ordinal() * 14 + card.getCardValue().ordinal() + 1;
-
-            float xPos = x + cos(start + angleStep * i) * radius;
-            float yPos = y + sin(start + angleStep * i) * radius;
-            GameObject cardObject = add(
-                    pos(xPos, yPos),
-                    rect(cardSize),
-                    color(Color.GREEN),
-                    anchor(AnchorType.CENTER),
-                    rotate(toDegrees(angle)),
-                    scale(1.0f),
-                    area(),
-                    mouse(),
-                    z(i)
-            );
-
-            GameObject cardSprite = cardObject.add(
-                "cardSprite",
-                anchor(AnchorType.CENTER),
-                pos(cardSize.scale(0.5f)),
-                sprite("cards").frame(frame),
-                scale(1.0f)
-            );
-
-//            // Make cards interactive
-//            cardObj.onClick(() => {
-//                    cardObj.isSelected = !cardObj.isSelected;
-//            if (cardObj.isSelected) {
-//                cardObj.moveTo(cardObj.originalPos.x, cardObj.originalPos.y - 30);
-//                cardObj.color = rgb(200, 200, 255);
-//            } else {
-//                cardObj.moveTo(cardObj.originalPos);
-//                cardObj.color = rgb(255, 255, 255);
-//            }
-//    });
-
-            cardObject.on(HOVER_ENTER,  (event) -> {
-                cardSprite.animate("scale2d", new Vec2(1.5f, 1.5f), 0.5f, EasingFunctions.EASE_OUT_ELASTIC);
-            });
-
-            cardObject.on(HOVER,  (MouseEvent event) -> {
-                event.consume();
-            });
-
-            cardObject.on(HOVER_LEAVE, (event) -> {
-                cardSprite.animate("scale2d", new Vec2(1.0f, 1.0f), 0.5f, EasingFunctions.EASE_OUT_ELASTIC);
-            });
-
-            cardObjects.add(cardObject);
-        }
-
-        return cardObjects;
     }
 
     private void onHoverEnter(Event event) {
