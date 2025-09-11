@@ -6,13 +6,13 @@ import com.berray.components.CoreComponentShortcuts;
 import com.berray.components.core.Action;
 import com.berray.components.core.AnchorType;
 import com.berray.components.core.Component;
+import com.berray.event.Event;
 import com.berray.math.Color;
 import com.berray.math.Vec2;
 
-import java.util.List;
+import java.util.*;
 
 import static com.berray.math.MathUtil.*;
-import static com.berray.math.MathUtil.sin;
 
 public class HandStack extends Component implements CoreComponentShortcuts {
 
@@ -28,8 +28,8 @@ public class HandStack extends Component implements CoreComponentShortcuts {
      */
     private float maxAngle = 5;
 
-    /** Distance of the center of the circle from the bottom of the stack object. */
-    private int height = 200; // maybe calculate from radius and total angle
+    /** List of cards over which another card is currently dragged. */
+    private List<GameObject> draggedOverCards = new ArrayList<>();
 
     public HandStack() {
         super("hand-stack");
@@ -39,28 +39,8 @@ public class HandStack extends Component implements CoreComponentShortcuts {
     public void add(GameObject gameObject) {
         super.add(gameObject);
         registerAction("addCard", this::addCard, AddCardAction::new);
-//        registerGetter("size", this::getSize);
     }
 
-    private Vec2 getSize() {
-        // todo: calculate size from radius, totalAngle and height
-        return new Vec2(300, 200);
-    }
-
-    private static class AddCardAction extends Action {
-
-        public AddCardAction(List<Object> params) {
-            super(params);
-        }
-
-        public Card getNewCard() {
-            return getParameter(0);
-        }
-
-        public int getPosition() {
-            return getParameter(1);
-        }
-    }
 
     private void addCard(AddCardAction action) {
         Card newCard = action.getNewCard();
@@ -83,12 +63,8 @@ public class HandStack extends Component implements CoreComponentShortcuts {
                 z(0)
         );
 
-        cardObject.on(DragComponent.EVENT_DRAG_ENTER, (event -> {
-            event.getSource().getChild("cardSprite").set("color", Color.GRAY);
-        }));
-        cardObject.on(DragComponent.EVENT_DRAG_LEAVE, (event -> {
-            event.getSource().getChild("cardSprite").set("color", Color.WHITE);
-        }));
+        cardObject.on(DragComponent.EVENT_DRAG_ENTER, this::processDragEnter);
+        cardObject.on(DragComponent.EVENT_DRAG_LEAVE, this::processDragLeave);
 
         int frame = newCard.getCardSuit().ordinal() * 14 + newCard.getCardValue().ordinal() + 1;
         GameObject cardSprite = cardObject.add(
@@ -126,4 +102,43 @@ public class HandStack extends Component implements CoreComponentShortcuts {
             card.setTransformDirty();
         }
     }
+
+    public void processDragEnter(Event event) {
+        // remove color from all dragged over cards
+        draggedOverCards.forEach(card -> card.getChild("cardSprite").set("color", Color.WHITE));
+        // add current card and sort by z  (highest z first)
+        draggedOverCards.add(event.getSource());
+        draggedOverCards.sort((a, b) -> b.getZ() - a.getZ());
+        // only add the highlight color to the card with the highest z (first in the list)
+        draggedOverCards.get(0).getChild("cardSprite").set("color", Color.GRAY);
+    }
+
+    public void processDragLeave(Event event) {
+        // remove color from all dragged over cards and add only the first one
+        draggedOverCards.forEach(card -> card.getChild("cardSprite").set("color", Color.WHITE));
+        // remove current card and sort by z  (highest z first)
+        draggedOverCards.remove(event.getSource());
+        // only if there are cards which are dragged over
+        if (!draggedOverCards.isEmpty()) {
+            draggedOverCards.sort((a, b) -> b.getZ() - a.getZ());
+            // only add the highlight color to the card with the highest z (first in the list)
+            draggedOverCards.get(0).getChild("cardSprite").set("color", Color.GRAY);
+        }
+    }
+
+    private static class AddCardAction extends Action {
+
+        public AddCardAction(List<Object> params) {
+            super(params);
+        }
+
+        public Card getNewCard() {
+            return getParameter(0);
+        }
+
+        public int getPosition() {
+            return getParameter(1);
+        }
+    }
+
 }

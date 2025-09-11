@@ -86,7 +86,7 @@ public class DragComponent extends Component {
     }
     GameObject other = event.getCollisionPartner();
     hoveredDropTargets.put(other.getId(), other);
-    // send collision partner a drag_enter event, as the
+    // send collision partner a drag_enter event
     event.getCollisionPartner().trigger(EVENT_DRAG_ENTER, other);
   }
 
