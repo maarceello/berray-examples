@@ -7,7 +7,7 @@ import com.berray.assets.SpriteSheet;
 import com.berray.components.core.Component;
 import com.berray.event.AnimationEvent;
 import com.berray.event.CoreEvents;
-import com.berray.examples.canasta.events.DropEvent;
+import com.berray.examples.canasta.events.DragEvent;
 import com.berray.math.Color;
 import com.berray.math.Rect;
 import com.berray.math.Vec2;
@@ -30,10 +30,10 @@ public class CardStackComponent extends Component {
     registerGetter("size", this::getSize);
     registerGetter("render" , () -> true);
 
-    on("drag_drop", this::onDrop);
+    on(DragEvent.EVENT_DRAG_DROP, this::onDrop);
   }
 
-  private void onDrop(DropEvent event) {
+  private void onDrop(DragEvent event) {
     GameObject source = event.getSource();
     if (source.is("card")) {
       Card card = source.getProperty("card");

@@ -3,15 +3,13 @@ package com.berray.examples.canasta;
 import com.berray.GameObject;
 import com.berray.components.core.Component;
 import com.berray.event.*;
-import com.berray.examples.canasta.events.DropEvent;
+import com.berray.examples.canasta.events.DragEvent;
 import com.berray.math.Vec2;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class DragComponent extends Component {
-  public static final String EVENT_DRAG_LEAVE = "drag_leave";
-  public static final String EVENT_DRAG_ENTER = "drag_enter";
   private String dragLayer = "dragLayer";
 
   /** true when the component is currently dragged. */
@@ -64,14 +62,14 @@ public class DragComponent extends Component {
     if (!hoveredDropTargets.isEmpty()) {
       // First tell all current hovered drop targets that the drag is finished
       for (GameObject dropTarget : hoveredDropTargets.values()) {
-        dropTarget.trigger(EVENT_DRAG_LEAVE, dropTarget);
+        dropTarget.trigger(new DragEvent(DragEvent.EVENT_DRAG_LEAVE, gameObject, dropTarget));
       }
 
       // Then send drop event to the drop targets. When the drop event is consumed, stop notifying the remaining objects
-      DropEvent dropEvent = new DropEvent(gameObject);
       for (GameObject dropTarget : hoveredDropTargets.values()) {
-        dropTarget.trigger(dropEvent);
-        if (dropEvent.isConsumed()) {
+        DragEvent dragEvent = new DragEvent(DragEvent.EVENT_DRAG_DROP, gameObject, dropTarget);
+        dropTarget.trigger(dragEvent);
+        if (dragEvent.isConsumed()) {
           break;
         }
       }
@@ -87,7 +85,7 @@ public class DragComponent extends Component {
     GameObject other = event.getCollisionPartner();
     hoveredDropTargets.put(other.getId(), other);
     // send collision partner a drag_enter event
-    event.getCollisionPartner().trigger(EVENT_DRAG_ENTER, other);
+    event.getCollisionPartner().trigger(new DragEvent(DragEvent.EVENT_DRAG_ENTER, gameObject, other));
   }
 
   private void onCollideEnd(PhysicsCollideEndEvent event) {
@@ -97,7 +95,7 @@ public class DragComponent extends Component {
     GameObject other = event.getCollision().getOther();
     if (other != null) {
       hoveredDropTargets.remove(other.getId());
-      other.trigger(EVENT_DRAG_LEAVE, other);
+      other.trigger(new DragEvent(DragEvent.EVENT_DRAG_LEAVE, gameObject, other));
     }
   }
 

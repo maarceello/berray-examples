@@ -3,6 +3,7 @@ package com.berray.examples.canasta;
 import com.berray.GameObject;
 import com.berray.components.core.Component;
 import com.berray.event.Event;
+import com.berray.examples.canasta.events.DragEvent;
 
 public class DropTargetComponent extends Component {
   private final String[] acceptedTags;
@@ -17,8 +18,8 @@ public class DropTargetComponent extends Component {
   @Override
   public void add(GameObject gameObject) {
     super.add(gameObject);
-    on("drag_enter", this::onDragEnter);
-    on("drag_leave", this::onDragLeave);
+    on(DragEvent.EVENT_DRAG_ENTER, this::onDragEnter);
+    on(DragEvent.EVENT_DRAG_LEAVE, this::onDragLeave);
     registerBoundProperty("dropHovered", this::isDropHovered, this::setDropHovered);
   }
 

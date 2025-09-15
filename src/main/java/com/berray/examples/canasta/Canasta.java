@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.berray.examples.canasta.DragComponent.draggable;
+import static com.berray.examples.canasta.DropTargetComponent.dropTarget;
 
 public class Canasta extends BerrayApplication implements CoreComponentShortcuts, CoreAssetShortcuts, CoreEvents {
 
@@ -47,7 +48,11 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
         GameObject handStack = add(
             pos(width() / 2, height() / 2),
             rect(600, 300).fill(false),
+            color(Color.GREEN),
             anchor(AnchorType.CENTER),
+            area(),
+            mouse(),
+            dropTarget("card"),
             new HandStack()
         );
 
@@ -67,11 +72,12 @@ public class Canasta extends BerrayApplication implements CoreComponentShortcuts
             GameObject cardObject = add(
                     "card",
                     rect(cardSize).fill(false),
+                    anchor(AnchorType.CENTER),
                     color(Color.GOLD),
-                    anchor(AnchorType.TOP_LEFT),
                     property("card", card),
                     pos(x * 65+33, 80),
                     layer(Game.DEFAULT_LAYER),
+                    rotate(0),
                     area(),
                     mouse(),
                     draggable()

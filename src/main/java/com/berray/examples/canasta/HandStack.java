@@ -3,11 +3,12 @@ package com.berray.examples.canasta;
 import com.berray.EasingFunctions;
 import com.berray.GameObject;
 import com.berray.components.CoreComponentShortcuts;
-import com.berray.components.core.Action;
-import com.berray.components.core.AnchorType;
-import com.berray.components.core.Component;
-import com.berray.event.Event;
+import com.berray.components.core.*;
+import com.berray.event.CoreEvents;
+import com.berray.event.UpdateEvent;
+import com.berray.examples.canasta.events.DragEvent;
 import com.berray.math.Color;
+import com.berray.math.MathUtil;
 import com.berray.math.Vec2;
 
 import java.util.*;
@@ -31,6 +32,13 @@ public class HandStack extends Component implements CoreComponentShortcuts {
     /** List of cards over which another card is currently dragged. */
     private List<GameObject> draggedOverCards = new ArrayList<>();
 
+    /** The card which is dragged over the hand. */
+    private GameObject draggedCard = null;
+
+    /** Container for the card arc. */
+    private GameObject cardsContainer = null;
+    private GameObject debugDragPoint;
+
     public HandStack() {
         super("hand-stack");
     }
@@ -39,8 +47,59 @@ public class HandStack extends Component implements CoreComponentShortcuts {
     public void add(GameObject gameObject) {
         super.add(gameObject);
         registerAction("addCard", this::addCard, AddCardAction::new);
+
+        on(DragEvent.EVENT_DRAG_ENTER, this::processStackDragEnter);
+        on(DragEvent.EVENT_DRAG_LEAVE, this::processStackDragLeave);
+        onGame(CoreEvents.UPDATE, this::onUpdate);
+
+        gameObject.add(
+                circle(radius),
+                anchor(AnchorType.CENTER),
+                pos(radius,radius*1.5f),
+                color(Color.RED)
+        );
+        this.cardsContainer = gameObject.add(pos(0,0));
+        debugDragPoint = gameObject.add(
+                circle(10),
+                anchor(AnchorType.CENTER),
+                pos(0,0),
+                color(Color.BLACK)
+        );
     }
 
+    private void onUpdate(UpdateEvent event) {
+        if (draggedCard != null) {
+            // calculate angle in which the card is
+
+            // calculate midpoint of the circle on which the hand cards are placed
+            Vec2 midPoint = new Vec2(radius, radius * 1.5f);
+
+            // get position of hovered object in local coordinate space. Add half of the card size to get the midpoint of the card
+            Vec2 localHoverPoint = draggedCard.localPosToOtherLocalPos(gameObject, Canasta.cardSize.scale(0.5f));
+
+            debugDragPoint.set("pos", localHoverPoint);
+
+            float angleRad = (float) Math.atan2(localHoverPoint.getY() - midPoint.getY(), localHoverPoint.getX() - midPoint.getX());
+            float angleDeg = MathUtil.toDegrees(angleRad);
+
+            draggedCard.animate("angle", angleDeg-90, 0.3f, EasingFunctions.EASE_OUT_ELASTIC);
+        }
+    }
+
+
+
+    public void processStackDragEnter(DragEvent event) {
+        draggedCard = event.getDraggedObject();
+        gameObject.set("color", Color.GOLD);
+    }
+
+    public void processStackDragLeave(DragEvent event) {
+        gameObject.set("color", Color.GREEN);
+        if (draggedCard != null) {
+            draggedCard.set("angle", 0f);
+            draggedCard = null;
+        }
+    }
 
     private void addCard(AddCardAction action) {
         Card newCard = action.getNewCard();
@@ -51,7 +110,7 @@ public class HandStack extends Component implements CoreComponentShortcuts {
         // add card to list of cards
         cards.add(position, newCard);
         // create game object
-        GameObject cardObject = gameObject.add(
+        GameObject cardObject = cardsContainer.add(
                 pos(radius,  radius),
                 rect(Canasta.cardSize),
                 color(Color.GREEN),
@@ -63,8 +122,8 @@ public class HandStack extends Component implements CoreComponentShortcuts {
                 z(0)
         );
 
-        cardObject.on(DragComponent.EVENT_DRAG_ENTER, this::processDragEnter);
-        cardObject.on(DragComponent.EVENT_DRAG_LEAVE, this::processDragLeave);
+        cardObject.on(DragEvent.EVENT_DRAG_ENTER, this::processCardDragEnter);
+        cardObject.on(DragEvent.EVENT_DRAG_LEAVE, this::processCardDragLeave);
 
         int frame = newCard.getCardSuit().ordinal() * 14 + newCard.getCardValue().ordinal() + 1;
         GameObject cardSprite = cardObject.add(
@@ -77,7 +136,7 @@ public class HandStack extends Component implements CoreComponentShortcuts {
         );
 
         // game object was added to the end of the children list. move the game object to the correct position
-        List<GameObject> children = gameObject.getChildren();
+        List<GameObject> children = cardsContainer.getChildren();
         children.remove(cardObject); // note: this does a linear scan, but as the operation is seldom, it shouldn't be a problem
         children.add(position, cardObject);
 
@@ -94,7 +153,7 @@ public class HandStack extends Component implements CoreComponentShortcuts {
             GameObject card = children.get(i);
             float angle = startAngle + angleStep * i - 90;
             float xPos = cos(toRadians(angle)) * radius + radius;
-            float yPos = sin(toRadians(angle)) * radius + radius;
+            float yPos = sin(toRadians(angle)) * radius + radius * 1.5f;
 
             card.animate("pos", new Vec2(xPos, yPos), 1f, EasingFunctions.EASE_OUT_QUADRATIC);
             card.animate("angle", (angle - 90 + 360) % 360, 2f, EasingFunctions.EASE_OUT_QUADRATIC);
@@ -103,21 +162,21 @@ public class HandStack extends Component implements CoreComponentShortcuts {
         }
     }
 
-    public void processDragEnter(Event event) {
+    public void processCardDragEnter(DragEvent event) {
         // remove color from all dragged over cards
         draggedOverCards.forEach(card -> card.getChild("cardSprite").set("color", Color.WHITE));
         // add current card and sort by z  (highest z first)
-        draggedOverCards.add(event.getSource());
+        draggedOverCards.add(event.getTarget());
         draggedOverCards.sort((a, b) -> b.getZ() - a.getZ());
         // only add the highlight color to the card with the highest z (first in the list)
         draggedOverCards.get(0).getChild("cardSprite").set("color", Color.GRAY);
     }
 
-    public void processDragLeave(Event event) {
+    public void processCardDragLeave(DragEvent event) {
         // remove color from all dragged over cards and add only the first one
         draggedOverCards.forEach(card -> card.getChild("cardSprite").set("color", Color.WHITE));
         // remove current card and sort by z  (highest z first)
-        draggedOverCards.remove(event.getSource());
+        draggedOverCards.remove(event.getTarget());
         // only if there are cards which are dragged over
         if (!draggedOverCards.isEmpty()) {
             draggedOverCards.sort((a, b) -> b.getZ() - a.getZ());
